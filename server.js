@@ -38,12 +38,10 @@ function consultar(falhar = false) {
 
 // --- ROTAS ---
 
-// Rota Principal
 app.get('/', (req, res) => {
   res.send('Servidor Node.js com Express funcionando!');
 });
 
-// Informações gerais e status
 app.get('/status', (req, res) => {
   res.json({ status: "online", sprint: 3 });
 });
@@ -91,7 +89,6 @@ app.get('/requisicao', (req, res) => {
   });
 });
 
-// Rotas do sistema de mensagens
 app.get('/mensagens', (req, res) => {
   res.json(listarMensagens());
 });
@@ -108,7 +105,7 @@ app.get('/total-mensagens', (req, res) => {
   res.json({ total: mensagens.length });
 });
 
-// Rota de consulta com Promise (Sprint 3)
+// (Sprint 3)
 app.get('/consulta-async', async (req, res) => {
   try {
     const dados = await consultar(false);
@@ -118,7 +115,35 @@ app.get('/consulta-async', async (req, res) => {
   }
 });
 
-// Inicialização do servidor (apenas uma chamada ao listen)
 app.listen(porta, '0.0.0.0', () => {
   console.log(`Servidor rodando em http://localhost:${porta}`);
+});
+
+// GET/ mensagens-then
+app.get("/mensagens-then", (req, res) => {
+  consultar()
+    .then(lista => res.json(lista))
+    .catch(() => res.status(500).json({ erro: "Falha na consulta" }));
+});
+
+//GET/ mensagens-async
+app.get("/mensagens-async", async (req, res) => {
+  try {
+    res.json(await consultar());
+  } catch (erro) {
+    res.status(500).json({
+      erro: "Falha na consulta"
+    });
+  }
+});
+
+//GET/ mensagens-erro
+app.get("/mensagens-erro", async (req, res) => {
+  try {
+    res.json(await consultar(true));
+  } catch (erro) {
+    res.status(500).json({
+      erro: "Falha simulada"
+    });
+  }
 });
